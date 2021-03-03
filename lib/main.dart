@@ -15,7 +15,7 @@ class NotesApp extends StatelessWidget {
         primarySwatch: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: DashBoard(title: 'NotesApp'),
+      home: DashBoard(),
     );
   }
 }

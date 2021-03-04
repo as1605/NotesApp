@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'Info.dart';
+import 'Draw.dart';
 
 class DrawingItem {
   final int id;
-  final String title;
-
+  String title;
   DrawingItem(this.id, this.title);
 }
 
@@ -17,11 +16,16 @@ class DashBoard extends StatefulWidget {
   _DashBoardState createState() => _DashBoardState();
 }
 
-List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems) {
+List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems, context) {
   List<ElevatedButton> widgets = [];
   for (int i = 0; i < listItems.length; i++) {
     widgets.add(ElevatedButton(
-        onPressed: () => {print("Pressed")},
+        onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Draw(listItems[i])),
+              )
+            },
         child: Text(listItems[i].title),
         style: ElevatedButton.styleFrom(
           primary: Colors.red.shade900,
@@ -31,10 +35,11 @@ List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems) {
 }
 
 class _DashBoardState extends State<DashBoard> {
+  int N = 3;
   List<DrawingItem> listItems = [
-    DrawingItem(1, "Drawing A"),
-    DrawingItem(2, "Drawing B"),
-    DrawingItem(3, "Drawing C"),
+    DrawingItem(1, "Note A"),
+    DrawingItem(2, "Note B"),
+    DrawingItem(3, "Note C"),
   ];
   TextEditingController textController = TextEditingController();
 
@@ -46,23 +51,24 @@ class _DashBoardState extends State<DashBoard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Icon(Icons.notes),
         title: Text(widget.title),
+        centerTitle: true,
       ),
       body: ListView(
         children: <Widget>[
               TextField(
                 controller: textController,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: ' Search',
+                ),
               )
             ] +
-            getWidgetsList(listItems),
+            getWidgetsList(listItems, context),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Info()),
-          )
-        },
+        onPressed: () => {addNewItemToList(++N, "New Note")},
         child: Icon(Icons.add),
       ),
     );

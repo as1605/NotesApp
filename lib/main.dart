@@ -12,9 +12,9 @@ class NotesApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'NotesApp',
       theme: ThemeData(
-        primarySwatch: Colors.red,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
+          primarySwatch: Colors.red,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          fontFamily: "Architect"),
       home: DashBoard(),
     );
   }

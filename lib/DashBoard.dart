@@ -4,6 +4,7 @@ import 'Draw.dart';
 class DrawingItem {
   final int id;
   String title;
+  List<Offset> points = <Offset>[];
   DrawingItem(this.id, this.title);
 }
 
@@ -28,7 +29,9 @@ List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems, context) {
             },
         child: Text(listItems[i].title),
         style: ElevatedButton.styleFrom(
-          primary: Colors.red.shade900,
+          primary: Colors.red.shade800,
+          elevation: 10,
+          side: BorderSide(color: Colors.red.shade900, width: 5),
         )));
   }
   return widgets;

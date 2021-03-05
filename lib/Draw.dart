@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notesapp/DashBoard.dart';
+import 'DashBoard.dart';
 
 class Draw extends StatefulWidget {
   final DrawingItem D;
@@ -22,6 +22,7 @@ Future<void> _rename(DrawingItem D, BuildContext context) async {
                 controller: TextEditingController(),
                 onSubmitted: (String value) async {
                   D.title = value;
+                  _DrawState(D);
                 },
               ),
             ],
@@ -42,37 +43,28 @@ class _DrawState extends State<Draw> {
   final DrawingItem D;
   _DrawState(this.D);
 
-  RenderBox object;
-  List<Offset> _points = <Offset>[];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: Builder(
-            builder: (BuildContext context2) {
-              return IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  _rename(D, context);
-                },
-              );
-            },
-          ),
+          leading: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                _rename(D, context);
+              }),
           title: Text(D.title)),
       body: Container(
         child: GestureDetector(
           onPanUpdate: (DragUpdateDetails details) => {
             setState(() {
               RenderBox object = context.findRenderObject();
-              Offset _localPosition =
-                  object.globalToLocal(details.globalPosition);
-              _points = List.from(_points)..add(_localPosition);
+              D.points = List.from(D.points)
+                ..add(object.globalToLocal(details.localPosition));
             })
           },
-          onPanEnd: (DragEndDetails details) => _points.add(null),
+          onPanEnd: (DragEndDetails details) => D.points.add(null),
           child: CustomPaint(
-            painter: Sketcher(points: _points),
+            painter: Sketcher(points: D.points),
             size: Size.infinite,
           ),
         ),
@@ -99,7 +91,7 @@ class Sketcher extends CustomPainter {
     Paint paint = Paint()
       ..color = Colors.black
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 1.0;
     for (int i = 0; i < points.length - 1; i++) {
       if (points[i] != null && points[i + 1] != null) {
         canvas.drawLine(points[i], points[i + 1], paint);

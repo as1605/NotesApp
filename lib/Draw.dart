@@ -8,51 +8,48 @@ class Draw extends StatefulWidget {
   _DrawState createState() => new _DrawState(D);
 }
 
-Future<void> _rename(DrawingItem D, BuildContext context) async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: true,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Rename'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              TextField(
-                controller: TextEditingController(),
-                onSubmitted: (String value) async {
-                  D.title = value;
-                  _DrawState(D);
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: Text('OK'),
-            onPressed: () => {Navigator.of(context).pop()},
-          ),
-        ],
-      );
-    },
-  );
-}
-
 class _DrawState extends State<Draw> {
-  final DrawingItem D;
+  DrawingItem D;
   _DrawState(this.D);
+  Future<void> _rename(DrawingItem D, BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Rename'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: TextEditingController(),
+                  onSubmitted: (String value) async {
+                    writeTitle(D.id, value);
+                    setState(() {
+                      D.title = value;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                _rename(D, context);
-              }),
-          title: Text(D.title)),
+        leading: IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              _rename(D, context);
+            }),
+        title: Text(D.title),
+      ),
       body: Container(
         child: GestureDetector(
           onPanUpdate: (DragUpdateDetails details) => {
@@ -70,11 +67,14 @@ class _DrawState extends State<Draw> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {
+        onPressed: () {
+          print("Hello");
+          print(D.points.toString());
+          writePoints(D.id, D.points);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => DashBoard()),
-          )
+          );
         },
         child: Icon(Icons.save),
       ),
@@ -92,6 +92,7 @@ class Sketcher extends CustomPainter {
       ..color = Colors.black
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 1.0;
+    if (points == null) return;
     for (int i = 0; i < points.length - 1; i++) {
       if (points[i] != null && points[i + 1] != null) {
         canvas.drawLine(points[i], points[i + 1], paint);

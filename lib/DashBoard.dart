@@ -1,11 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'Draw.dart';
+
+Future<void> writeTitle(int id, String s) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setString('title' + id.toString(), s);
+}
+
+Future<String> readTitle(int id) async {
+  String out;
+  final prefs = await SharedPreferences.getInstance();
+  out = prefs.getString('title' + id.toString());
+  return out;
+}
+
+Future<void> writePoints(int id, List<Offset> L) async {
+  String temp = "";
+  L.forEach((element) {
+    if (element != null)
+      temp += '(' + element.dx.toString() + ',' + element.dy.toString() + ')';
+  });
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setString('points' + id.toString(), temp);
+}
+
+Future<List<Offset>> readPoints(int id) async {
+  List<Offset> out = <Offset>[];
+  String temp;
+  final prefs = await SharedPreferences.getInstance();
+  temp = prefs.getString('points' + id.toString());
+  if (temp == null) return out;
+  String x = "", y = "";
+  int i = 0;
+  while (i < temp.length) {
+    if (temp[i] == '(') {
+      i++;
+      while (temp[i] != ',') {
+        x += temp[i];
+        i++;
+      }
+      i++;
+      while (temp[i] != ')') {
+        y += temp[i];
+        i++;
+      }
+      i++;
+    }
+    out.add(Offset(double.parse(x), double.parse(y)));
+    x = "";
+    y = "";
+  }
+  return out;
+}
 
 class DrawingItem {
   final int id;
   String title;
   List<Offset> points = <Offset>[];
-  DrawingItem(this.id, this.title);
+
+  DrawingItem(this.id, this.title) {
+    writeTitle(id, title);
+  }
 }
 
 class DashBoard extends StatefulWidget {
@@ -15,26 +71,6 @@ class DashBoard extends StatefulWidget {
 
   @override
   _DashBoardState createState() => _DashBoardState();
-}
-
-List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems, context) {
-  List<ElevatedButton> widgets = [];
-  for (int i = 0; i < listItems.length; i++) {
-    widgets.add(ElevatedButton(
-        onPressed: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Draw(listItems[i])),
-              )
-            },
-        child: Text(listItems[i].title),
-        style: ElevatedButton.styleFrom(
-          primary: Colors.red.shade800,
-          elevation: 10,
-          side: BorderSide(color: Colors.red.shade900, width: 5),
-        )));
-  }
-  return widgets;
 }
 
 class _DashBoardState extends State<DashBoard> {
@@ -48,6 +84,38 @@ class _DashBoardState extends State<DashBoard> {
 
   void addNewItemToList(int id, String title) {
     setState(() => {listItems.add(DrawingItem(id, title))});
+  }
+
+  void renameDrawing(DrawingItem D, String s) {
+    writeTitle(D.id, s);
+    setState(() => {D.title = s});
+  }
+
+  List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems, context) {
+    List<ElevatedButton> widgets = [];
+    listItems.forEach((element) {
+      widgets.add(ElevatedButton(
+          onPressed: () async {
+            //for testing, update when clicked
+            String t = await readTitle(element.id);
+            List<Offset> p = await readPoints(element.id);
+            setState(() {
+              element.title = t;
+              element.points = p;
+            });
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Draw(element)),
+            );
+          },
+          child: Text(element.title),
+          style: ElevatedButton.styleFrom(
+            primary: Colors.red.shade800,
+            elevation: 10,
+            side: BorderSide(color: Colors.red.shade900, width: 5),
+          )));
+    });
+    return widgets;
   }
 
   @override

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'Draw.dart';
 
 Future<void> writeTitle(int id, String s) async {
@@ -56,12 +55,10 @@ Future<List<Offset>> readPoints(int id) async {
 
 class DrawingItem {
   final int id;
-  String title;
+  String title = "New Note";
   List<Offset> points = <Offset>[];
 
-  DrawingItem(this.id, this.title) {
-    writeTitle(id, title);
-  }
+  DrawingItem(this.id);
 }
 
 class DashBoard extends StatefulWidget {
@@ -73,22 +70,25 @@ class DashBoard extends StatefulWidget {
   _DashBoardState createState() => _DashBoardState();
 }
 
+int N = 0;
+List<DrawingItem> listItems = [];
+
 class _DashBoardState extends State<DashBoard> {
-  int N = 3;
-  List<DrawingItem> listItems = [
-    DrawingItem(1, "Note A"),
-    DrawingItem(2, "Note B"),
-    DrawingItem(3, "Note C"),
-  ];
   TextEditingController textController = TextEditingController();
 
-  void addNewItemToList(int id, String title) {
-    setState(() => {listItems.add(DrawingItem(id, title))});
-  }
-
-  void renameDrawing(DrawingItem D, String s) {
-    writeTitle(D.id, s);
-    setState(() => {D.title = s});
+  void addNewItemToList(int id) async {
+    DrawingItem T = DrawingItem(id);
+    String t = await readTitle(id);
+    if (t == null) {
+      writeTitle(T.id, T.title);
+    } else
+      T.title = t;
+    setState(() {
+      listItems.add(T);
+    });
+    if (readTitle(id) != null) {
+      T.title = await readTitle(id);
+    }
   }
 
   List<ElevatedButton> getWidgetsList(List<DrawingItem> listItems, context) {
@@ -139,7 +139,7 @@ class _DashBoardState extends State<DashBoard> {
             getWidgetsList(listItems, context),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {addNewItemToList(++N, "New Note")},
+        onPressed: () => {addNewItemToList(++N)},
         child: Icon(Icons.add),
       ),
     );

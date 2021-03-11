@@ -68,8 +68,6 @@ class _DrawState extends State<Draw> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print("Hello");
-          print(D.points.toString());
           writePoints(D.id, D.points);
           Navigator.push(
             context,
